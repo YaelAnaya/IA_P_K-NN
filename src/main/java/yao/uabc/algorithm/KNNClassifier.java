@@ -6,6 +6,7 @@ import yao.uabc.utilities.ListUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Esta clase modela al clasificador K-NN (K-Nearest Neighbors).
@@ -43,8 +44,7 @@ public class KNNClassifier {
 
         // Se obtienen los k elementos más cercanos.
         var neighbors = results.subList(0, k);
-
-        // Se obtiene la clase mayoritaria de los k elementos más cercanos.
+        // Se obtiene la clase más común entre los k elementos más cercanos.
         var predicted =  ListUtils.mostCommonItem(neighbors.stream().map(KDistance::spot).toList());
         var expected = data.getId();
         return new Prediction(expected, predicted);
@@ -66,6 +66,7 @@ public class KNNClassifier {
         }
         return Math.sqrt(sum);
     }
+
 
 
 }

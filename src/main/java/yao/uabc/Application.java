@@ -17,10 +17,8 @@ public class Application {
 
         var dataset = FileManager.loadDataset("trainer", "participante_yh13_training.csv");
         // Se mezcla el dataset.
-        var random = -1785392387304718916L;
-
         System.out.println("Randomizing the dataset...");
-        Collections.shuffle(dataset, new Random(random));
+        Collections.shuffle(dataset, new Random(1));
 
 
         // Se divide el dataset en dos partes, el 80% para entrenamiento y el 20% para pruebas.
@@ -30,7 +28,7 @@ public class Application {
         var testingSet = dataset.subList(trainingPercentage, dataset.size());
 
         // Se entrena el K-NN con el conjunto de entrenamiento.
-        var classifier = new KNNClassifier(23);
+        var classifier = new KNNClassifier(3);
         classifier.train(trainingSet);
 
         // Se realiza la predicción con el conjunto de pruebas.
@@ -39,73 +37,15 @@ public class Application {
         for (var data : testingSet) {
             predictions.add(classifier.predict(data));
         }
+        // se muestran los correctos e incorrectos
+        var correctos = predictions.stream().filter(Prediction::isCorrect).count();
+        var incorrectos = predictions.stream().filter(p -> !p.isCorrect()).count();
+        System.out.println("Correctos: " + correctos);
+        System.out.println("Incorrectos: " + incorrectos);
 
         // Se imprimen las métricas de desempeño.
-        var accuracy = getAccuracy(predictions);
-        System.out.println("Accuracy: " + accuracy);
-        System.out.println("Correct: " + predictions.stream().filter(Prediction::isCorrect).count());
-        System.out.println("Incorrect: " + (predictions.size() - predictions.stream().filter(Prediction::isCorrect).count()));
+        new Metrics(predictions);
 
-        var precision = getPrecision(predictions);
 
-        var recall = getRecall(predictions);
-
-        var f1Score = getF1Score(precision, recall);
-
-        System.out.printf("Precision: %.2f%n", precision);
-        System.out.printf("Recall: %.2f%n", recall);
-        System.out.printf("F1 Score: %.2f%n", f1Score);
     }
-
-    /**
-     * Este método calcula la precisión del modelo.
-     * https://www.themachinelearners.com/metricas-de-clasificacion/#Principales_Meacutetricas_de_clasificacioacuten
-     * @param predictions Las predicciones realizadas por el modelo.
-     * @return La precisión del modelo.
-     * */
-     private static double getAccuracy(ArrayList<Prediction> predictions) {
-         var correct = predictions.stream().filter(Prediction::isCorrect).count();
-         return (double) correct / predictions.size() * 100;
-     }
-
-     /**
-      * Este método calcula el Fscore del modelo.
-      * https://www.themachinelearners.com/metricas-de-clasificacion/#Principales_Meacutetricas_de_clasificacioacuten
-      * @param precision La precisión del modelo.
-      * @param recall El recall del modelo.
-      * @return El Fscore del modelo.
-      * */
-    private static double getF1Score(double precision, double recall) {
-        return 2 * ((precision * recall) / (precision + recall));
-    }
-
-    /**
-     * Este método calcula el recall del modelo.
-     * https://www.themachinelearners.com/metricas-de-clasificacion/#Principales_Meacutetricas_de_clasificacioacuten
-     *
-     * @param predictions Las predicciones realizadas por el modelo.
-     * @return La precisión del modelo.
-     * */
-    private static double getRecall(ArrayList<Prediction> predictions) {
-        var correct = predictions.stream().filter(Prediction::isCorrect).toList();
-        var total = predictions.stream().filter(p -> p.expected() == 1).count();
-        var correctTotal = correct.stream().filter(p -> p.expected() == 1).count();
-        return (double) correctTotal / total;
-    }
-
-    /**
-     * Este método calcula la precisión del modelo.
-     * https://www.themachinelearners.com/metricas-de-clasificacion/#Principales_Meacutetricas_de_clasificacioacuten
-     * @param predictions Las predicciones realizadas por el modelo.
-     * @return La precisión del modelo.
-     * */
-    private static double getPrecision(ArrayList<Prediction> predictions) {
-        var correct = predictions.stream().filter(Prediction::isCorrect).count();
-        var incorrect = predictions.size() - correct;
-        return (double) correct / (correct + incorrect);
-    }
-
-
-
-
 }
